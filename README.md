@@ -18,12 +18,6 @@ This project helps detect potentially fraudulent job postings using an XGBoost m
 
 ---
 
-## 📊 Dashboard Preview
-
-![Dashboard Preview](https://user-images.githubusercontent.com/example/dashboard-preview.png)
-
----
-
 ## 🧠 1. Model Training (`job_fraud_xgb.py`)
 
 This script trains an XGBoost classifier on job posting data and outputs:
