@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Job Fraud Detection Dashboard
 ===========================================================
-A Dash web‑app to explore pre‑computed job‑fraud predictions with pre-trained XGBoost model.
+A Dash web-app to explore pre-computed job-fraud predictions with pre-trained XGBoost model.
 
 Run
 ---
@@ -14,11 +14,8 @@ Browse to **http://127.0.0.1:8050** to view the dashboard.
 
 import argparse
 import os
-import re
-import requests
 import joblib
 import pandas as pd
-from bs4 import BeautifulSoup
 
 import dash
 from dash import html, dcc, dash_table
@@ -49,7 +46,7 @@ def label(df: pd.DataFrame) -> pd.DataFrame:
 
 def figures(df: pd.DataFrame):
     hist = px.histogram(df, x="fake_percentage", nbins=40,
-                        title="Fraud‑Probability Distribution",
+                        title="Fraud-Probability Distribution",
                         labels={"fake_percentage": "Fraud Probability (%)"})
     pie = px.pie(df, names="is_fake", title="Fake vs Real")
     return hist, pie
@@ -79,7 +76,7 @@ def create_app(df0: pd.DataFrame, model_path: str):
         html.Img(src="/assets/important_keywords.png", style={"width": "100%"}),
 
 
-        html.H3("Top 10 Suspicious Listings", className="mt-4"),
+        html.H3("Top 10 Suspicious Listings", className="mt-4"),
         dash_table.DataTable(id="tbl-top", data=top0.to_dict("records"),
                              columns=[{"name": i, "id": i} for i in top0.columns],
                              style_table={"overflowX": "auto"},

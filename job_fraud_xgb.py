@@ -3,7 +3,7 @@
 -------------------------------------------------
 Train an XGBoost model that classifies job postings
 as genuine (0) or fraudulent (1) and outputs a
-fake‑probability percentage for every record.
+fake-probability percentage for every record.
 
 Usage
 -----
@@ -11,7 +11,7 @@ python job_fraud_xgb.py --train Train.csv --output predictions.csv
 
 Dependencies
 ------------
-pandas, scikit‑learn, xgboost
+pandas, scikit-learn, xgboost
 Install via:
     pip install -U pandas scikit-learn xgboost
 """
@@ -28,7 +28,7 @@ import joblib  # for optional model persistence
 
 
 def build_pipeline(text_col: str, num_cols: list, pos_weight: float) -> Pipeline:
-    """Return a scikit‑learn pipeline with TF‑IDF + XGBoost."""
+    """Return a scikit-learn pipeline with TF-IDF + XGBoost."""
     text_pipe = TfidfVectorizer(
         max_features=40_000,
         ngram_range=(1, 2),
@@ -77,7 +77,7 @@ def main(args):
         if col not in df.columns:
             raise ValueError(f"Required column '{col}' missing in input CSV.")
 
-    # Train‑test split
+    # Train-test split
     X = df[[text_col] + num_cols]
     y = df[target_col]
     X_train, X_test, y_train, y_test = train_test_split(
@@ -95,7 +95,7 @@ def main(args):
 
     # Evaluate
     y_pred = model.predict(X_test)
-    print("\n=== Evaluation on hold‑out set ===")
+    print("\n=== Evaluation on hold-out set ===")
     print(classification_report(y_test, y_pred, digits=4))
     print("F1 score:", f1_score(y_test, y_pred))
 
@@ -109,15 +109,15 @@ def main(args):
         print(f"\nPredictions with 'fake_percentage' saved to {args.output}")
 
     # ─────────────────────────────────────────────────────────────────────────────
-    # Explainability: SHAP + Word‑Cloud
+    # Explainability: SHAP + Word-Cloud
     # ─────────────────────────────────────────────────────────────────────────────
     def generate_explainability_artifacts(model, X_full,
                                         shap_path="assets/shap_summary.png",
                                         wc_path="assets/important_keywords.png",
                                         n_samples=100):
         """
-        Create a SHAP summary plot and a word‑cloud of top TF‑IDF tokens.
-        Saves files to the given paths (use "assets/" so Dash can auto‑serve).
+        Create a SHAP summary plot and a word-cloud of top TF-IDF tokens.
+        Saves files to the given paths (use "assets/" so Dash can auto-serve).
         """
         import os
         import numpy as np
@@ -130,11 +130,11 @@ def main(args):
 
         # ------------------ Prepare feature matrix exactly as XGBoost sees it ----
         prep = model.named_steps["prep"]
-        vec_text = prep.named_transformers_["text"]        # TF‑IDF vectorizer
+        vec_text = prep.named_transformers_["text"]        # TF-IDF vectorizer
         X_trans  = prep.transform(X_full)                  # sparse matrix
 
-        # Construct feature‑name list (text first, then numeric passthrough cols)
-        text_features = vec_text.get_feature_names_out()   # 40 000 names
+        # Construct feature-name list (text first, then numeric passthrough cols)
+        text_features = vec_text.get_feature_names_out()   # 40 000 names
         num_features  = ["telecommuting", "has_company_logo", "has_questions"]
         feature_names = np.concatenate([text_features, num_features])
 
@@ -150,7 +150,7 @@ def main(args):
         plt.savefig(shap_path, dpi=250)
         plt.clf()
 
-        # ------------------ Word‑cloud of token importances ----------------------
+        # ------------------ Word-cloud of token importances ----------------------
         importances = model.named_steps["clf"].feature_importances_
         word_scores = dict(zip(text_features,
                             importances[:len(text_features)]))  # only text part
@@ -161,7 +161,7 @@ def main(args):
                     collocations=False).generate_from_frequencies(word_scores)
         wc.to_file(wc_path)
 
-        print(f"✓ SHAP saved to {shap_path}\n✓ Word‑cloud saved to {wc_path}")
+        print(f"✓ SHAP saved to {shap_path}\n✓ Word-cloud saved to {wc_path}")
 
 
     # ---------------------------------------------------------------------------
