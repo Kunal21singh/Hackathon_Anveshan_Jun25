@@ -1,0 +1,15 @@
+# Core dependencies
+pandas
+scikit-learn
+xgboost
+joblib
+
+# Dashboard requirements
+dash
+dash-bootstrap-components
+plotly
+
+# For optional HTML parsing (in dashboard)
+beautifulsoup4
+requests
+requests-html
