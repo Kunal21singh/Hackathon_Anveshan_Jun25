@@ -108,6 +108,70 @@ def main(args):
         df.to_csv(args.output, index=False)
         print(f"\nPredictions with 'fake_percentage' saved to {args.output}")
 
+    # ─────────────────────────────────────────────────────────────────────────────
+    # Explainability: SHAP + Word‑Cloud
+    # ─────────────────────────────────────────────────────────────────────────────
+    def generate_explainability_artifacts(model, X_full,
+                                        shap_path="assets/shap_summary.png",
+                                        wc_path="assets/important_keywords.png",
+                                        n_samples=100):
+        """
+        Create a SHAP summary plot and a word‑cloud of top TF‑IDF tokens.
+        Saves files to the given paths (use "assets/" so Dash can auto‑serve).
+        """
+        import os
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import shap
+        from wordcloud import WordCloud
+
+        # Ensure output folder exists
+        os.makedirs(os.path.dirname(shap_path), exist_ok=True)
+
+        # ------------------ Prepare feature matrix exactly as XGBoost sees it ----
+        prep = model.named_steps["prep"]
+        vec_text = prep.named_transformers_["text"]        # TF‑IDF vectorizer
+        X_trans  = prep.transform(X_full)                  # sparse matrix
+
+        # Construct feature‑name list (text first, then numeric passthrough cols)
+        text_features = vec_text.get_feature_names_out()   # 40 000 names
+        num_features  = ["telecommuting", "has_company_logo", "has_questions"]
+        feature_names = np.concatenate([text_features, num_features])
+
+        # ------------------ SHAP summary plot (global importance) ----------------
+        explainer  = shap.Explainer(model.named_steps["clf"])
+        shap_vals  = explainer(X_trans[:n_samples])        # subsample for speed
+
+        shap.summary_plot(shap_vals.values,
+                        features=X_trans[:n_samples],
+                        feature_names=feature_names,
+                        show=False)
+        plt.tight_layout()
+        plt.savefig(shap_path, dpi=250)
+        plt.clf()
+
+        # ------------------ Word‑cloud of token importances ----------------------
+        importances = model.named_steps["clf"].feature_importances_
+        word_scores = dict(zip(text_features,
+                            importances[:len(text_features)]))  # only text part
+
+        wc = WordCloud(width=800,
+                    height=400,
+                    background_color="white",
+                    collocations=False).generate_from_frequencies(word_scores)
+        wc.to_file(wc_path)
+
+        print(f"✓ SHAP saved to {shap_path}\n✓ Word‑cloud saved to {wc_path}")
+
+
+    # ---------------------------------------------------------------------------
+    # Call the helper (put this right after you calculate `proba`)
+    # ---------------------------------------------------------------------------
+    generate_explainability_artifacts(model, X)
+
+
+    
+
     # Save model if requested
     if args.model_out:
         joblib.dump(model, args.model_out)

@@ -73,6 +73,12 @@ def create_app(df0: pd.DataFrame, model_path: str):
             dbc.Col(dcc.Graph(id="hist", figure=hist0), md=6),
             dbc.Col(dcc.Graph(id="pie", figure=pie0), md=6),
         ]),
+        html.H3("Explainability Overview"),
+        html.Img(src="/assets/shap_summary.png", style={"width": "100%"}),
+        html.Br(),
+        html.Img(src="/assets/important_keywords.png", style={"width": "100%"}),
+
+
         html.H3("Top 10 Suspicious Listings", className="mt-4"),
         dash_table.DataTable(id="tbl-top", data=top0.to_dict("records"),
                              columns=[{"name": i, "id": i} for i in top0.columns],
